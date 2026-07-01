@@ -4,8 +4,8 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Todo Tasks</title>
-    <script type="module" crossorigin src="/assets/index-BDDXLopC.js"></script>
-    <link rel="stylesheet" crossorigin href="/assets/index-Cj9AE_NK.css">
+    <script type="module" crossorigin src="/assets/index-Br5MBcJX.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-COz3iNYj.css">
   </head>
   <body>
     <div class="app-shell">
@@ -45,7 +45,27 @@
           </div>
           <div class="task-list"></div>
         </section>
+
+        <section class="column" data-status="archivado">
+          <div class="column-header">
+            <h2>Archivado</h2>
+            <span class="badge" data-count>0</span>
+          </div>
+          <div class="task-list"></div>
+        </section>
       </main>
+    </div>
+
+    <div id="confirm-modal" class="modal hidden" aria-hidden="true">
+      <div class="modal-backdrop" data-modal-close></div>
+      <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+        <h2 id="modal-title">Confirmar eliminación</h2>
+        <p>¿Estás seguro de que deseas eliminar esta tarea?</p>
+        <div class="modal-actions">
+          <button id="cancel-delete" type="button">Cancelar</button>
+          <button id="confirm-delete" type="button" class="danger">Eliminar</button>
+        </div>
+      </div>
     </div>
 
   </body>

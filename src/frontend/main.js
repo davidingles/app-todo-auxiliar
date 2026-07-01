@@ -8,14 +8,36 @@ const columns = {
   pendiente: document.querySelector('[data-status="pendiente"] .task-list'),
   en_proceso: document.querySelector('[data-status="en_proceso"] .task-list'),
   completado: document.querySelector('[data-status="completado"] .task-list'),
+  archivado: document.querySelector('[data-status="archivado"] .task-list'),
 };
 
-function getStatusLabel(status) {
-  return {
-    pendiente: 'Pendiente',
-    en_proceso: 'En Proceso',
-    completado: 'Completado',
-  }[status] ?? 'Pendiente';
+let tasksCache = [];
+let deleteTargetId = null;
+
+function getTasksForColumn(status) {
+  return tasksCache
+    .filter((task) => task.status === status)
+    .sort((a, b) => a.position - b.position);
+}
+
+function getColumnStatus(listElement) {
+  return listElement.closest('.column')?.dataset.status;
+}
+
+function openDeleteModal(taskId) {
+  deleteTargetId = taskId;
+  const modal = document.getElementById('confirm-modal');
+  if (!modal) return;
+  modal.classList.remove('hidden');
+  modal.setAttribute('aria-hidden', 'false');
+}
+
+function closeDeleteModal() {
+  deleteTargetId = null;
+  const modal = document.getElementById('confirm-modal');
+  if (!modal) return;
+  modal.classList.add('hidden');
+  modal.setAttribute('aria-hidden', 'true');
 }
 
 function createCard(task) {
@@ -24,16 +46,11 @@ function createCard(task) {
   card.draggable = true;
   card.dataset.id = task.id;
   card.dataset.status = task.status;
+  card.dataset.position = task.position;
 
   card.innerHTML = `
-    <h3>${task.title}</h3>
-    <p>${task.description || 'Sin descripción'}</p>
-    <div class="card-actions">
-      <select class="task-status-select">
-        <option value="pendiente" ${task.status === 'pendiente' ? 'selected' : ''}>Pendiente</option>
-        <option value="en_proceso" ${task.status === 'en_proceso' ? 'selected' : ''}>En Proceso</option>
-        <option value="completado" ${task.status === 'completado' ? 'selected' : ''}>Completado</option>
-      </select>
+    <div class="card-header">
+      <h3>${task.title}</h3>
       <button class="delete-btn" type="button" aria-label="Eliminar tarea">✕</button>
     </div>
   `;
@@ -47,24 +64,70 @@ function createCard(task) {
     card.classList.remove('dragging');
   });
 
+  card.addEventListener('dragover', (event) => {
+    event.preventDefault();
+    card.classList.add('drag-over');
+  });
+
+  card.addEventListener('dragleave', () => {
+    card.classList.remove('drag-over');
+  });
+
+  card.addEventListener('drop', async (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    card.classList.remove('drag-over');
+    const taskId = event.dataTransfer.getData('text/plain');
+    if (!taskId || taskId === task.id) return;
+
+    const draggedTask = tasksCache.find((item) => item.id === taskId);
+    if (!draggedTask) return;
+
+    const targetStatus = task.status;
+    const targetColumnTasks = getTasksForColumn(targetStatus);
+    const targetIndex = targetColumnTasks.findIndex((item) => item.id === task.id);
+    const isBefore = event.clientY < card.getBoundingClientRect().top + card.offsetHeight / 2;
+
+    const referenceTasks = [...targetColumnTasks];
+    const newIndex = isBefore ? targetIndex : targetIndex + 1;
+    const prevTask = referenceTasks[newIndex - 1] || null;
+    const nextTask = referenceTasks[newIndex] || null;
+    const newPosition = computeNextPosition(prevTask, nextTask);
+
+    await updateTask(draggedTask.id, {
+      status: targetStatus,
+      position: newPosition,
+    });
+  });
+
   return card;
 }
 
 function renderTasks(tasks) {
+  tasksCache = tasks;
+
   Object.values(columns).forEach((list) => {
     list.innerHTML = '';
   });
 
-  tasks.forEach((task) => {
-    const column = columns[task.status] || columns.pendiente;
-    column.appendChild(createCard(task));
+  Object.keys(columns).forEach((status) => {
+    getTasksForColumn(status).forEach((task) => {
+      columns[status].appendChild(createCard(task));
+    });
   });
 
   document.querySelectorAll('[data-count]').forEach((badge) => {
     const status = badge.closest('.column').dataset.status;
-    const count = tasks.filter((task) => task.status === status).length;
+    const count = getTasksForColumn(status).length;
     badge.textContent = count;
   });
+}
+
+function computeNextPosition(prevTask, nextTask) {
+  if (!prevTask && !nextTask) return Date.now();
+  if (!prevTask) return nextTask.position - 1;
+  if (!nextTask) return prevTask.position + 1;
+  return Math.floor((prevTask.position + nextTask.position) / 2);
 }
 
 async function loadTasks() {
@@ -112,30 +175,54 @@ async function deleteTask(taskId) {
 }
 
 function attachInteractions() {
-  document.addEventListener('change', async (event) => {
-    if (!event.target.classList.contains('task-status-select')) return;
-    const card = event.target.closest('.task-card');
-    if (!card) return;
-    await updateTask(card.dataset.id, { status: event.target.value });
-  });
-
   document.addEventListener('click', async (event) => {
     if (!event.target.classList.contains('delete-btn')) return;
     const card = event.target.closest('.task-card');
     if (!card) return;
-    await deleteTask(card.dataset.id);
+    openDeleteModal(card.dataset.id);
   });
+
+  document.getElementById('cancel-delete').addEventListener('click', closeDeleteModal);
+  document.getElementById('confirm-delete').addEventListener('click', async () => {
+    if (!deleteTargetId) return;
+    await deleteTask(deleteTargetId);
+    closeDeleteModal();
+  });
+
+  document.querySelector('[data-modal-close]').addEventListener('click', closeDeleteModal);
 
   Object.entries(columns).forEach(([status, list]) => {
     list.addEventListener('dragover', (event) => {
       event.preventDefault();
     });
 
+    list.addEventListener('dragenter', () => {
+      list.classList.add('drag-over');
+    });
+
+    list.addEventListener('dragleave', () => {
+      list.classList.remove('drag-over');
+    });
+
     list.addEventListener('drop', async (event) => {
       event.preventDefault();
+      list.classList.remove('drag-over');
       const taskId = event.dataTransfer.getData('text/plain');
       if (!taskId) return;
-      await updateTask(taskId, { status });
+
+      const draggedTask = tasksCache.find((task) => task.id === taskId);
+      if (!draggedTask) return;
+
+      const targetStatus = status;
+      const targetColumnTasks = getTasksForColumn(targetStatus);
+      const newPosition = targetColumnTasks.length
+        ? targetColumnTasks[targetColumnTasks.length - 1].position + 1
+        : Date.now();
+
+      await updateTask(draggedTask.id, {
+        status: targetStatus,
+        position: newPosition,
+      });
     });
   });
 }
