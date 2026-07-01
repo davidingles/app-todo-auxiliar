@@ -1,4 +1,8 @@
-import './style.css';
+import css from './style.css?raw';
+
+const styleTag = document.createElement('style');
+styleTag.textContent = css;
+document.head.appendChild(styleTag);
 
 const API_URL = 'http://127.0.0.1:3001/api/tasks';
 const taskForm = document.getElementById('task-form');
@@ -13,6 +17,8 @@ const columns = {
 
 let tasksCache = [];
 let deleteTargetId = null;
+let selectedTaskId = null;
+let editingTaskId = null;
 
 function getTasksForColumn(status) {
   return tasksCache
@@ -40,10 +46,56 @@ function closeDeleteModal() {
   modal.setAttribute('aria-hidden', 'true');
 }
 
+function openEditModal(taskId) {
+  const task = tasksCache.find((item) => item.id === taskId);
+  if (!task) return;
+
+  editingTaskId = taskId;
+  document.getElementById('edit-task-title').value = task.title;
+  document.getElementById('edit-task-description').value = task.description || '';
+
+  const modal = document.getElementById('edit-modal');
+  if (!modal) return;
+  modal.classList.remove('hidden');
+  modal.setAttribute('aria-hidden', 'false');
+  document.getElementById('edit-task-title').focus();
+}
+
+function closeEditModal() {
+  editingTaskId = null;
+  const modal = document.getElementById('edit-modal');
+  if (!modal) return;
+  modal.classList.add('hidden');
+  modal.setAttribute('aria-hidden', 'true');
+}
+
+function selectTask(taskId) {
+  selectedTaskId = taskId;
+  document.querySelectorAll('.task-card').forEach((card) => {
+    const isSelected = card.dataset.id === taskId;
+    card.classList.toggle('is-selected', isSelected);
+    card.setAttribute('aria-selected', String(isSelected));
+  });
+}
+
+function getStatusOrder() {
+  return ['pendiente', 'en_proceso', 'completado', 'archivado'];
+}
+
+function getNextStatus(status, direction) {
+  const statuses = getStatusOrder();
+  const index = statuses.indexOf(status);
+  if (index === -1) return status;
+  const nextIndex = index + direction;
+  return statuses[Math.max(0, Math.min(statuses.length - 1, nextIndex))] || status;
+}
+
 function createCard(task) {
   const card = document.createElement('article');
   card.className = 'task-card';
   card.draggable = true;
+  card.tabIndex = 0;
+  card.setAttribute('role', 'button');
   card.dataset.id = task.id;
   card.dataset.status = task.status;
   card.dataset.position = task.position;
@@ -51,9 +103,59 @@ function createCard(task) {
   card.innerHTML = `
     <div class="card-header">
       <h3>${task.title}</h3>
-      <button class="delete-btn" type="button" aria-label="Eliminar tarea">✕</button>
+      <button class="delete-btn" type="button" aria-label="Eliminar tarea" tabindex="-1">✕</button>
     </div>
   `;
+
+  card.addEventListener('click', () => {
+    selectTask(task.id);
+  });
+
+  card.addEventListener('focus', () => {
+    selectTask(task.id);
+  });
+
+  card.addEventListener('keydown', async (event) => {
+    if (event.key === 'Tab' && !event.shiftKey) {
+      const cards = Array.from(document.querySelectorAll('.task-card'));
+      const currentIndex = cards.findIndex((item) => item.dataset.id === task.id);
+      const nextCard = cards[currentIndex + 1];
+      if (nextCard) {
+        event.preventDefault();
+        nextCard.focus();
+        selectTask(nextCard.dataset.id);
+      }
+      return;
+    }
+
+    if (event.key === 'Tab' && event.shiftKey) {
+      const cards = Array.from(document.querySelectorAll('.task-card'));
+      const currentIndex = cards.findIndex((item) => item.dataset.id === task.id);
+      const prevCard = cards[currentIndex - 1];
+      if (prevCard) {
+        event.preventDefault();
+        prevCard.focus();
+        selectTask(prevCard.dataset.id);
+      }
+      return;
+    }
+
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      selectTask(task.id);
+      openEditModal(task.id);
+      return;
+    }
+
+    if (event.ctrlKey && (event.key === 'ArrowRight' || event.key === 'ArrowLeft')) {
+      event.preventDefault();
+      const direction = event.key === 'ArrowRight' ? 1 : -1;
+      const nextStatus = getNextStatus(task.status, direction);
+      if (nextStatus !== task.status) {
+        await updateTask(task.id, { status: nextStatus, position: Date.now() });
+      }
+    }
+  });
 
   card.addEventListener('dragstart', (event) => {
     card.classList.add('dragging');
@@ -121,6 +223,15 @@ function renderTasks(tasks) {
     const count = getTasksForColumn(status).length;
     badge.textContent = count;
   });
+
+  if (selectedTaskId) {
+    const selectedTask = tasksCache.find((task) => task.id === selectedTaskId);
+    if (selectedTask) {
+      selectTask(selectedTask.id);
+    } else {
+      selectedTaskId = null;
+    }
+  }
 }
 
 function computeNextPosition(prevTask, nextTask) {
@@ -190,6 +301,19 @@ function attachInteractions() {
   });
 
   document.querySelector('[data-modal-close]').addEventListener('click', closeDeleteModal);
+
+  document.getElementById('cancel-edit').addEventListener('click', closeEditModal);
+  document.getElementById('save-edit').addEventListener('click', async () => {
+    if (!editingTaskId) return;
+    const title = document.getElementById('edit-task-title').value.trim();
+    const description = document.getElementById('edit-task-description').value.trim();
+    if (!title) return;
+
+    await updateTask(editingTaskId, { title, description });
+    closeEditModal();
+  });
+
+  document.querySelector('[data-edit-close]').addEventListener('click', closeEditModal);
 
   Object.entries(columns).forEach(([status, list]) => {
     list.addEventListener('dragover', (event) => {
