@@ -19,6 +19,7 @@ let tasksCache = [];
 let deleteTargetId = null;
 let selectedTaskId = null;
 let editingTaskId = null;
+let lastFocusedElement = null;
 
 function getTasksForColumn(status) {
   return tasksCache
@@ -30,12 +31,49 @@ function getColumnStatus(listElement) {
   return listElement.closest('.column')?.dataset.status;
 }
 
+function getFocusableElements(container) {
+  return Array.from(
+    container.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])')
+  ).filter((element) => {
+    const isHidden = element.getAttribute('aria-hidden') === 'true' || element.hidden;
+    const isDisabled = element.disabled;
+    return !isHidden && !isDisabled && element.tabIndex !== -1;
+  });
+}
+
+function handleModalKeydown(event) {
+  if (event.key !== 'Tab') return;
+
+  const modal = document.querySelector('.modal:not(.hidden)');
+  if (!modal) return;
+
+  const focusableElements = getFocusableElements(modal);
+  if (focusableElements.length === 0) return;
+
+  const firstElement = focusableElements[0];
+  const lastElement = focusableElements[focusableElements.length - 1];
+  const isShiftTab = event.shiftKey;
+
+  if (isShiftTab && document.activeElement === firstElement) {
+    event.preventDefault();
+    lastElement.focus();
+  } else if (!isShiftTab && document.activeElement === lastElement) {
+    event.preventDefault();
+    firstElement.focus();
+  }
+}
+
 function openDeleteModal(taskId) {
   deleteTargetId = taskId;
   const modal = document.getElementById('confirm-modal');
   if (!modal) return;
+  lastFocusedElement = document.activeElement;
   modal.classList.remove('hidden');
   modal.setAttribute('aria-hidden', 'false');
+  requestAnimationFrame(() => {
+    const cancelButton = document.getElementById('cancel-delete');
+    if (cancelButton) cancelButton.focus();
+  });
 }
 
 function closeDeleteModal() {
@@ -44,6 +82,10 @@ function closeDeleteModal() {
   if (!modal) return;
   modal.classList.add('hidden');
   modal.setAttribute('aria-hidden', 'true');
+  if (lastFocusedElement && typeof lastFocusedElement.focus === 'function') {
+    lastFocusedElement.focus();
+  }
+  lastFocusedElement = null;
 }
 
 function openEditModal(taskId) {
@@ -147,13 +189,125 @@ function createCard(task) {
       return;
     }
 
+    if (event.key === 'Delete') {
+      event.preventDefault();
+      selectTask(task.id);
+      openDeleteModal(task.id);
+      return;
+    }
+
+    // Handle Ctrl+Arrow first (before plain Arrow handlers)
     if (event.ctrlKey && (event.key === 'ArrowRight' || event.key === 'ArrowLeft')) {
       event.preventDefault();
       const direction = event.key === 'ArrowRight' ? 1 : -1;
       const nextStatus = getNextStatus(task.status, direction);
       if (nextStatus !== task.status) {
         await updateTask(task.id, { status: nextStatus, position: Date.now() });
+        await loadTasks();
+        // Focus and select the task in its new column
+        selectTask(task.id);
+        const updatedCard = document.querySelector(`[data-id="${task.id}"]`);
+        if (updatedCard) updatedCard.focus();
       }
+      return;
+    }
+
+    if (event.ctrlKey && (event.key === 'ArrowUp' || event.key === 'ArrowDown')) {
+      event.preventDefault();
+      const columnTasks = getTasksForColumn(task.status);
+      const currentIndex = columnTasks.findIndex((item) => item.id === task.id);
+      
+      if (event.key === 'ArrowUp' && currentIndex > 0) {
+        // Swap with previous task
+        const prevTask = columnTasks[currentIndex - 1];
+        const tempPosition = task.position;
+        await updateTask(task.id, { position: prevTask.position });
+        await updateTask(prevTask.id, { position: tempPosition });
+        // Refetch and maintain focus on current task
+        await loadTasks();
+        const updatedCard = document.querySelector(`[data-id="${task.id}"]`);
+        if (updatedCard) updatedCard.focus();
+      } else if (event.key === 'ArrowDown' && currentIndex < columnTasks.length - 1) {
+        // Swap with next task
+        const nextTask = columnTasks[currentIndex + 1];
+        const tempPosition = task.position;
+        await updateTask(task.id, { position: nextTask.position });
+        await updateTask(nextTask.id, { position: tempPosition });
+        // Refetch and maintain focus on current task
+        await loadTasks();
+        const updatedCard = document.querySelector(`[data-id="${task.id}"]`);
+        if (updatedCard) updatedCard.focus();
+      }
+      return;
+    }
+
+    // Plain Arrow key handlers (without Ctrl)
+    if (event.key === 'ArrowUp') {
+      event.preventDefault();
+      const columnTasks = getTasksForColumn(task.status);
+      const currentIndex = columnTasks.findIndex((item) => item.id === task.id);
+      if (currentIndex > 0) {
+        const prevTask = columnTasks[currentIndex - 1];
+        const prevCard = document.querySelector(`[data-id="${prevTask.id}"]`);
+        if (prevCard) {
+          prevCard.focus();
+          selectTask(prevTask.id);
+        }
+      }
+      return;
+    }
+
+    if (event.key === 'ArrowDown') {
+      event.preventDefault();
+      const columnTasks = getTasksForColumn(task.status);
+      const currentIndex = columnTasks.findIndex((item) => item.id === task.id);
+      if (currentIndex < columnTasks.length - 1) {
+        const nextTask = columnTasks[currentIndex + 1];
+        const nextCard = document.querySelector(`[data-id="${nextTask.id}"]`);
+        if (nextCard) {
+          nextCard.focus();
+          selectTask(nextTask.id);
+        }
+      }
+      return;
+    }
+
+    if (event.key === 'ArrowLeft') {
+      event.preventDefault();
+      const statuses = getStatusOrder();
+      const currentStatusIndex = statuses.indexOf(task.status);
+      if (currentStatusIndex > 0) {
+        const prevStatus = statuses[currentStatusIndex - 1];
+        const prevColumnTasks = getTasksForColumn(prevStatus);
+        if (prevColumnTasks.length > 0) {
+          const nextTask = prevColumnTasks[0];
+          const nextCard = document.querySelector(`[data-id="${nextTask.id}"]`);
+          if (nextCard) {
+            nextCard.focus();
+            selectTask(nextTask.id);
+          }
+        }
+      }
+      return;
+    }
+
+    if (event.key === 'ArrowRight') {
+      event.preventDefault();
+      const statuses = getStatusOrder();
+      const currentStatusIndex = statuses.indexOf(task.status);
+      if (currentStatusIndex < statuses.length - 1) {
+        const nextStatus = statuses[currentStatusIndex + 1];
+        const nextColumnTasks = getTasksForColumn(nextStatus);
+        if (nextColumnTasks.length > 0) {
+          const nextTask = nextColumnTasks[0];
+          const nextCard = document.querySelector(`[data-id="${nextTask.id}"]`);
+          if (nextCard) {
+            nextCard.focus();
+            selectTask(nextTask.id);
+          }
+        }
+      }
+      return;
     }
   });
 
@@ -286,6 +440,8 @@ async function deleteTask(taskId) {
 }
 
 function attachInteractions() {
+  document.addEventListener('keydown', handleModalKeydown);
+
   document.addEventListener('click', async (event) => {
     if (!event.target.classList.contains('delete-btn')) return;
     const card = event.target.closest('.task-card');
