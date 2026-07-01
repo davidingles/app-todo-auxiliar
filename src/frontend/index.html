@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Todo Tasks</title>
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">Panel local</p>
+          <h1>Todo Tasks</h1>
+        </div>
+        <form id="task-form" class="task-form">
+          <input id="task-title" type="text" placeholder="Nueva tarea" required />
+          <textarea id="task-description" placeholder="Descripción" rows="2"></textarea>
+          <button type="submit">Añadir</button>
+        </form>
+      </header>
+
+      <main class="kanban">
+        <section class="column" data-status="pendiente">
+          <div class="column-header">
+            <h2>Pendiente</h2>
+            <span class="badge" data-count>0</span>
+          </div>
+          <div class="task-list"></div>
+        </section>
+
+        <section class="column" data-status="en_proceso">
+          <div class="column-header">
+            <h2>En Proceso</h2>
+            <span class="badge" data-count>0</span>
+          </div>
+          <div class="task-list"></div>
+        </section>
+
+        <section class="column" data-status="completado">
+          <div class="column-header">
+            <h2>Completado</h2>
+            <span class="badge" data-count>0</span>
+          </div>
+          <div class="task-list"></div>
+        </section>
+      </main>
+    </div>
+
+    <script type="module" src="/main.js"></script>
+  </body>
+</html>

@@ -1,0 +1,96 @@
+===============================================================================
+                       PLAN DE DESARROLLO: TODO TASK APP
+===============================================================================
+
+[ENTORNO DE DESARROLLO Y CONFIGURACIÓN]
+- Sistema Operativo: Windows 11 (Terminal: PowerShell / pwsh)
+- Entorno: Vite + Vanilla JavaScript (HTML5, CSS3 modernos)
+- Base de Datos: SQLite3 (mediante la librería 'better-sqlite3' en el backend)
+- Arquitectura: Aplicación de escritorio local o Web con servidor local ligero (Node.js/Express) para conectar Vite con SQLite3.
+- Arquitectura Visual: Interfaz Kanban/Cards interactiva, sobria, moderna y minimalista con animaciones fluidas.
+- Usuario: Monousuario (sin login, acceso directo).
+
+===============================================================================
+1. PAUTAS DE ESTILO Y DISEÑO DE INTERFAZ (UI/UX)
+===============================================================================
+Para asegurar una coherencia visual absoluta desde el primer componente, la IA debe seguir estrictamente estas directrices de CSS:
+
+- Paleta de Colores (Sobria y Minimalista):
+  * Fondo General: #0f1115 (Oscuro profundo, reduce la fatiga visual).
+  * Fondo de Tarjetas/Paneles: #161920 (Ligero contraste sobre el fondo).
+  * Bordes sutiles: #242936 (Líneas finas de 1px).
+  * Texto Principal: #e2e8f0 (Blanco suave, alta legibilidad).
+  * Texto Secundario: #94a3b8 (Gris atenuado para metadatos).
+  * Acentos de Estado (Desaturados, no neón):
+    - Pendiente: #64748b (Gris acero)
+    - En Proceso: #3b82f6 (Azul corporativo apagado)
+    - Completado: #10b981 (Verde esmeralda apagado)
+
+- Tipografía y Espaciados:
+  * Fuente: 'Inter', system-ui, -apple-system, sans-serif.
+  * Padding y Margen base: Múltiplos de 4px/8px para una rejilla perfecta (8px, 16px, 24px).
+  * Radio de borde (Border-radius): 8px para elementos interactivos, 12px para contenedores mayores.
+
+- Animaciones y Transiciones (Fluidas y Agradables):
+  * Transición por defecto: `all 0.25s cubic-bezier(0.4, 0, 0.2, 1);`
+  * Efecto de arrastre (Drag & Drop): Escala ligera en la tarjeta seleccionada (`transform: scale(1.02);`), sombra sutil flotante (`box-shadow: 0 10px 25px -5px rgba(0,0,0,0.3);`).
+  * Despliegue de menús/Drop-downs: Animación de opacidad y desplazamiento vertical leve (fade-in + slide-down).
+
+===============================================================================
+2. INSTRUCCIÓN MAESTRA PARA LA IA (PROMPT PRINCIPAL)
+===============================================================================
+Copia y pega el siguiente prompt a la IA de VS Code cuando vayas a iniciar el desarrollo:
+
+"""
+Actúa como un Ingeniero de Software Fullstack experto en Node.js, SQLite3 y desarrollo frontend con Vite + Vanilla JS. 
+
+Vamos a construir una aplicación web de gestión de tareas (TODO Tasks) local. El proyecto se ejecutará exclusivamente en entornos Windows 11 utilizando PowerShell (pwsh). Debe ser una aplicación monousuario altamente visual, basada en tarjetas (Cards) interactivas que se pueden arrastrar y soltar (Drag & Drop nativo o librería ligera) o mover mediante menús desplegables (Drop-downs) para evolucionar su estado entre: 'Pendiente', 'En Proceso' y 'Completado'.
+
+REGLAS DE DESARROLLO CRÍTICAS:
+1. NO escribas todo el código de golpe. Trabajaremos de forma incremental, hito por hito. Yo te indicaré cuándo avanzar.
+2. Cada vez que me des código, asegúrate de que use estrictamente el sistema de diseño estipulado (colores oscuros sobrios, minimalismo, fuentes del sistema y animaciones de transición fluidas cubic-bezier).
+3. Estructura el proyecto separando de manera limpia el frontend (Vite) de la lógica del servidor local de persistencia (Express + better-sqlite3).
+4. Todas las instrucciones de terminal que me proporciones deben ser comandos válidos para PowerShell (pwsh) en Windows (usa `mkdir`, `cd`, `npm run`, etc.).
+
+Por favor, confirma que has comprendido el alcance, el stack tecnológico y las reglas de diseño. No generes código todavía. Espérame en el Hito 1.
+"""
+
+===============================================================================
+3. ESTRATEGIA DE IMPLEMENTACIÓN POR HITOS (PASO A PASO)
+===============================================================================
+
+HITO 1: Inicialización del Entorno (PowerShell)
+- Crear el directorio del proyecto.
+- Inicializar el proyecto con Vite utilizando la plantilla de Vanilla JS (`npm create vite@latest . -- --template vanilla`).
+- Instalar las dependencias de backend requeridas: `express`, `better-sqlite3`, `cors`, `dotenv`.
+- Estructurar las carpetas del proyecto:
+    /src
+      /frontend -> Código de Vite (main.js, style.css, index.html)
+      /backend  -> Servidor Node + base de datos (server.js, db.js)
+
+HITO 2: Base de Datos y API Local (Backend)
+- Crear el archivo `db.js` configurando `better-sqlite3`.
+- Crear la tabla `tasks` con la siguiente estructura:
+    * id (TEXT, PRIMARY KEY / UUID)
+    * title (TEXT, NOT NULL)
+    * description (TEXT)
+    * status (TEXT, DEFAULT 'pendiente') -> valores: 'pendiente', 'en_proceso', 'completado'
+    * position (INTEGER) -> para mantener el orden visual en las columnas
+    * updated_at (TEXT)
+- Desarrollar un servidor Express básico en `server.js` con las rutas de la API:
+    * GET /api/tasks -> Obtener todas las tareas.
+    * POST /api/tasks -> Crear una nueva tarea.
+    * PUT /api/tasks/:id -> Actualizar estado, posición o datos de una tarea.
+    * DELETE /api/tasks/:id -> Eliminar una tarea.
+
+HITO 3: Maquetación Base y Estilos CSS (Frontend)
+- Limpiar el `style.css` generado por Vite e implementar las variables, tipografías y estilos base definidos en la Sección 1.
+- Crear el diseño del Layout principal en `index.html` estructurado en 3 columnas Kanban (Pendiente, En Proceso, Completado).
+- Diseñar la interfaz de la Card base y los menús interactivos (Drop-down integrado en la tarjeta para cambiar de estado rápidamente con un clic, además de la opción drag).
+
+HITO 4: Interactividad y Conexión con la API
+- Desarrollar las funciones en `main.js` para realizar el fetch de las tareas al backend.
+- Implementar el renderizado dinámico de las Cards dentro de sus respectivas columnas.
+- Añadir la lógica de arrastrar y soltar (Drag & Drop) nativa de HTML5, asegurando que al soltar una tarjeta en una nueva columna se lance una petición PUT a la API actualizando su estado de forma inmediata y fluida.
+- Agregar las animaciones de CSS para que la inserción, eliminación y movimiento de tarjetas se perciba orgánico y elástico.
+===============================================================================
