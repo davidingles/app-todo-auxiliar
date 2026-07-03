@@ -8,9 +8,14 @@
   <body>
     <div class="app-shell">
       <header class="topbar">
-        <div>
-          <p class="eyebrow">Panel local</p>
-          <h1>Todo Tasks</h1>
+        <div class="topbar-row">
+          <div>
+            <p class="eyebrow">Panel local</p>
+            <h1>Todo Tasks</h1>
+          </div>
+          <div class="search-container">
+            <input id="search-input" type="text" placeholder="Buscar tareas..." autocomplete="off" />
+          </div>
         </div>
         <form id="task-form" class="task-form">
           <input id="task-title" type="text" placeholder="Nueva tarea" required />
