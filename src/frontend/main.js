@@ -151,8 +151,15 @@ function createCard(task) {
     </div>
   `;
 
-  card.addEventListener('click', () => {
+  card.addEventListener('click', (event) => {
+    if (event.target.closest('.delete-btn')) return;
     selectTask(task.id);
+  });
+
+  card.addEventListener('dblclick', (event) => {
+    if (event.target.closest('.delete-btn')) return;
+    selectTask(task.id);
+    openEditModal(task.id);
   });
 
   card.addEventListener('focus', () => {
@@ -472,6 +479,7 @@ function attachInteractions() {
 
    document.addEventListener('click', async (event) => {
     if (!event.target.classList.contains('delete-btn')) return;
+    event.stopPropagation();
     const card = event.target.closest('.task-card');
     if (!card) return;
     openDeleteModal(card.dataset.id);
