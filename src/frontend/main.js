@@ -8,6 +8,7 @@ const API_URL = 'http://127.0.0.1:3001/api/tasks';
 const taskForm = document.getElementById('task-form');
 const titleInput = document.getElementById('task-title');
 const descriptionInput = document.getElementById('task-description');
+const searchInput = document.getElementById('search-input');
 const columns = {
   pendiente: document.querySelector('[data-status="pendiente"] .task-list'),
   en_proceso: document.querySelector('[data-status="en_proceso"] .task-list'),
@@ -16,13 +17,14 @@ const columns = {
 };
 
 let tasksCache = [];
+let filteredTasksCache = [];
 let deleteTargetId = null;
 let selectedTaskId = null;
 let editingTaskId = null;
 let lastFocusedElement = null;
 
-function getTasksForColumn(status) {
-  return tasksCache
+function getTasksForColumn(status, tasks = tasksCache) {
+  return tasks
     .filter((task) => task.status === status)
     .sort((a, b) => a.position - b.position);
 }
@@ -361,27 +363,42 @@ function createCard(task) {
 
 function renderTasks(tasks) {
   tasksCache = tasks;
+  applySearchFilter();
+}
 
+function applySearchFilter() {
+  const searchTerm = searchInput.value.trim().toLowerCase();
+  
   Object.values(columns).forEach((list) => {
     list.innerHTML = '';
   });
 
+  filteredTasksCache = searchTerm
+    ? tasksCache.filter(task => 
+        task.title.toLowerCase().includes(searchTerm) || 
+        (task.description && task.description.toLowerCase().includes(searchTerm))
+      )
+    : [...tasksCache];
+
   Object.keys(columns).forEach((status) => {
-    getTasksForColumn(status).forEach((task) => {
-      columns[status].appendChild(createCard(task));
-    });
+    filteredTasksCache
+      .filter(task => task.status === status)
+      .sort((a, b) => a.position - b.position)
+      .forEach(task => columns[status].appendChild(createCard(task)));
   });
 
   document.querySelectorAll('[data-count]').forEach((badge) => {
     const status = badge.closest('.column').dataset.status;
-    const count = getTasksForColumn(status).length;
+    const count = filteredTasksCache.filter(t => t.status === status).length;
     badge.textContent = count;
   });
 
   if (selectedTaskId) {
-    const selectedTask = tasksCache.find((task) => task.id === selectedTaskId);
-    if (selectedTask) {
+    const selectedTask = tasksCache.find(task => task.id === selectedTaskId);
+    if (selectedTask && filteredTasksCache.some(t => t.id === selectedTaskId)) {
       selectTask(selectedTask.id);
+      const card = document.querySelector(`[data-id="${selectedTaskId}"]`);
+      if (card) card.focus();
     } else {
       selectedTaskId = null;
     }
@@ -440,9 +457,20 @@ async function deleteTask(taskId) {
 }
 
 function attachInteractions() {
-  document.addEventListener('keydown', handleModalKeydown);
+   document.addEventListener('keydown', handleModalKeydown);
 
-  document.addEventListener('click', async (event) => {
+   searchInput.addEventListener('input', () => {
+     applySearchFilter();
+   });
+
+   document.addEventListener('keydown', (event) => {
+     if (event.ctrlKey && (event.key === 'f' || event.key === 'F')) {
+       event.preventDefault();
+       searchInput.focus();
+     }
+   });
+
+   document.addEventListener('click', async (event) => {
     if (!event.target.classList.contains('delete-btn')) return;
     const card = event.target.closest('.task-card');
     if (!card) return;

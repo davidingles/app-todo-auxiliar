@@ -50,6 +50,16 @@ npm run preview
 - **Delete**: Eliminar tarea
 - **Ctrl+F**: Enfocar el buscador
 
+### Navegación por teclado
+- **Tab/Shift+Tab**: Navegar entre tareas
+- **Enter**: Abrir modal de edición
+- **Delete**: Eliminar tarea
+- **Ctrl+F**: Enfocar el buscador
+
+### Búsqueda
+- Escribe en el campo de búsqueda para filtrar tareas por título o descripción
+- Las tareas que no coinciden quedan ocultas
+
 ### Movimiento entre columnas
 - **Ctrl+Arrow Left/Right**: Cambiar estado de la tarea
 - **Ctrl+Arrow Up/Down**: Reordenar posición dentro de la columna
