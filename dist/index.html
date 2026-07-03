@@ -4,14 +4,19 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Todo Tasks</title>
-    <script type="module" crossorigin src="/assets/index-PZk-Y92a.js"></script>
+    <script type="module" crossorigin src="/assets/index-C-mix9t0.js"></script>
   </head>
   <body>
     <div class="app-shell">
       <header class="topbar">
-        <div>
-          <p class="eyebrow">Panel local</p>
-          <h1>Todo Tasks</h1>
+        <div class="topbar-row">
+          <div>
+            <p class="eyebrow">Panel local</p>
+            <h1>Todo Tasks</h1>
+          </div>
+          <div class="search-container">
+            <input id="search-input" type="text" placeholder="Buscar tareas..." autocomplete="off" />
+          </div>
         </div>
         <form id="task-form" class="task-form">
           <input id="task-title" type="text" placeholder="Nueva tarea" required />
