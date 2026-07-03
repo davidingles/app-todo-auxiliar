@@ -181,8 +181,32 @@ p {
 
 .column-header {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
+  gap: 10px;
+}
+
+.column-header h2 {
+  margin-bottom: 8px;
+  font-size: 1rem;
+}
+
+.column-sort {
+  width: 100%;
+  max-width: 150px;
+  border: 1px solid var(--border);
+  background: #0f1115;
+  color: var(--text);
+  border-radius: 8px;
+  padding: 6px 8px;
+  font-size: 0.82rem;
+  transition: all 0.2s ease;
+}
+
+.column-sort:focus {
+  outline: 2px solid #60a5fa;
+  outline-offset: 2px;
+  border-color: #60a5fa;
 }
 
 .badge {
@@ -259,7 +283,62 @@ p {
 }
 
 .card-actions {
-  display: none;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 0 0 auto;
+}
+
+.card-action-btn {
+  width: 26px;
+  height: 26px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--muted);
+  border-radius: 6px;
+  padding: 4px;
+  display: inline-grid;
+  place-items: center;
+  line-height: 1;
+  transition: all 0.2s ease;
+}
+
+.card-action-btn:hover {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(148, 163, 184, 0.3);
+}
+
+.card-action-btn svg {
+  width: 16px;
+  height: 16px;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  fill: none;
+}
+
+.tag-btn:hover {
+  color: #67e8f9;
+}
+
+.task-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding-right: 32px;
+}
+
+.task-tag {
+  max-width: 100%;
+  border: 1px solid rgba(34, 211, 238, 0.3);
+  background: rgba(34, 211, 238, 0.08);
+  color: #a5f3fc;
+  border-radius: 999px;
+  padding: 2px 7px;
+  font-size: 0.74rem;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
 }
 
 .task-status-select {
@@ -267,14 +346,7 @@ p {
 }
 
 .delete-btn {
-  border: none;
-  background: transparent;
-  color: var(--muted);
-  padding: 0;
   font-size: 1rem;
-  position: absolute;
-  top: 10px;
-  right: 10px;
 }
 
 .delete-btn:hover {

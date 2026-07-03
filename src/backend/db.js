@@ -12,11 +12,17 @@ db.exec(`
     id TEXT PRIMARY KEY,
     title TEXT NOT NULL,
     description TEXT,
+    tags TEXT DEFAULT '[]',
     status TEXT DEFAULT 'pendiente',
     position INTEGER,
     updated_at TEXT
   )
 `);
+
+const taskColumns = db.prepare('PRAGMA table_info(tasks)').all().map((column) => column.name);
+if (!taskColumns.includes('tags')) {
+  db.exec("ALTER TABLE tasks ADD COLUMN tags TEXT DEFAULT '[]'");
+}
 
 export function getAllTasks() {
   return db.prepare('SELECT * FROM tasks ORDER BY position, updated_at').all();
@@ -24,8 +30,8 @@ export function getAllTasks() {
 
 export function createTask(task) {
   const stmt = db.prepare(`
-    INSERT INTO tasks (id, title, description, status, position, updated_at)
-    VALUES (@id, @title, @description, @status, @position, @updated_at)
+    INSERT INTO tasks (id, title, description, tags, status, position, updated_at)
+    VALUES (@id, @title, @description, @tags, @status, @position, @updated_at)
   `);
   stmt.run(task);
   return task;
@@ -36,6 +42,7 @@ export function updateTaskById(task) {
     UPDATE tasks
     SET title = @title,
         description = @description,
+        tags = @tags,
         status = @status,
         position = @position,
         updated_at = @updated_at

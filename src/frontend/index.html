@@ -27,7 +27,14 @@
       <main class="kanban">
         <section class="column" data-status="pendiente">
           <div class="column-header">
-            <h2>Pendiente</h2>
+            <div>
+              <h2>Pendiente</h2>
+              <select class="column-sort" data-sort-control aria-label="Ordenar Pendiente">
+                <option value="manual">Manual</option>
+                <option value="date">Fecha</option>
+                <option value="tags">Etiquetas</option>
+              </select>
+            </div>
             <span class="badge" data-count>0</span>
           </div>
           <div class="task-list"></div>
@@ -35,7 +42,14 @@
 
         <section class="column" data-status="en_proceso">
           <div class="column-header">
-            <h2>En Proceso</h2>
+            <div>
+              <h2>En Proceso</h2>
+              <select class="column-sort" data-sort-control aria-label="Ordenar En Proceso">
+                <option value="manual">Manual</option>
+                <option value="date">Fecha</option>
+                <option value="tags">Etiquetas</option>
+              </select>
+            </div>
             <span class="badge" data-count>0</span>
           </div>
           <div class="task-list"></div>
@@ -43,7 +57,14 @@
 
         <section class="column" data-status="completado">
           <div class="column-header">
-            <h2>Completado</h2>
+            <div>
+              <h2>Completado</h2>
+              <select class="column-sort" data-sort-control aria-label="Ordenar Completado">
+                <option value="manual">Manual</option>
+                <option value="date">Fecha</option>
+                <option value="tags">Etiquetas</option>
+              </select>
+            </div>
             <span class="badge" data-count>0</span>
           </div>
           <div class="task-list"></div>
@@ -51,7 +72,14 @@
 
         <section class="column" data-status="archivado">
           <div class="column-header">
-            <h2>Archivado</h2>
+            <div>
+              <h2>Archivado</h2>
+              <select class="column-sort" data-sort-control aria-label="Ordenar Archivado">
+                <option value="manual">Manual</option>
+                <option value="date">Fecha</option>
+                <option value="tags">Etiquetas</option>
+              </select>
+            </div>
             <span class="badge" data-count>0</span>
           </div>
           <div class="task-list"></div>
@@ -82,6 +110,10 @@
         <label class="field">
           <span>Descripción</span>
           <textarea id="edit-task-description" rows="4"></textarea>
+        </label>
+        <label class="field">
+          <span>Etiquetas</span>
+          <input id="edit-task-tags" type="text" placeholder="trabajo, urgente, diseño" />
         </label>
         <div class="modal-actions">
           <button id="cancel-edit" type="button">Cancelar</button>
