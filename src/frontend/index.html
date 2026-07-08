@@ -14,7 +14,7 @@
               <circle cx="11" cy="11" r="8" />
               <path d="M21 21l-4.35-4.35" />
             </svg>
-            <input id="search-input" type="text" placeholder="Buscar tareas...   (/)" autocomplete="off" />
+            <input id="search-input" type="text" placeholder="Buscar tareas...   (/)" autocomplete="off" autofocus />
           </div>
           <div class="topbar-right">
             <div class="user-info">
@@ -122,43 +122,28 @@
 
     <div id="edit-modal" class="modal hidden" aria-hidden="true">
       <div class="modal-backdrop" data-edit-close></div>
-      <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="edit-modal-title">
+      <div class="modal-content edit-modal-content" role="dialog" aria-modal="true" aria-labelledby="edit-modal-title">
         <h2 id="edit-modal-title">Editar tarea</h2>
         <label class="field">
           <span>Título</span>
           <input id="edit-task-title" type="text" />
         </label>
-        <label class="field">
+        <label class="field edit-desc-field">
           <span>Descripción</span>
-          <textarea id="edit-task-description" rows="4"></textarea>
+          <textarea id="edit-task-description" rows="6"></textarea>
         </label>
-        <fieldset class="field tag-field" id="edit-task-tags">
-          <legend>Etiquetas</legend>
-          <label class="tag-choice tag-choice-trabajo">
-            <input type="checkbox" value="trabajo" />
-            <span>Trabajo</span>
-          </label>
-          <label class="tag-choice tag-choice-gym">
-            <input type="checkbox" value="gym" />
-            <span>Gym</span>
-          </label>
-          <label class="tag-choice tag-choice-familia">
-            <input type="checkbox" value="familia" />
-            <span>Familia</span>
-          </label>
-          <label class="tag-choice tag-choice-devs">
-            <input type="checkbox" value="devs" />
-            <span>Devs</span>
-          </label>
-          <label class="tag-choice tag-choice-religion">
-            <input type="checkbox" value="religion" />
-            <span>Religión</span>
-          </label>
-          <label class="tag-choice tag-choice-personal">
-            <input type="checkbox" value="personal" />
-            <span>Personal</span>
-          </label>
-        </fieldset>
+        <label class="field edit-tags-field">
+          <span>Etiqueta</span>
+          <select id="edit-task-tags">
+            <option value="">— Sin etiqueta —</option>
+            <option value="trabajo">Trabajo</option>
+            <option value="gym">Gym</option>
+            <option value="familia">Familia</option>
+            <option value="devs">Devs</option>
+            <option value="religion">Religión</option>
+            <option value="personal">Personal</option>
+          </select>
+        </label>
         <div class="modal-actions">
           <button id="cancel-edit" type="button">Cancelar</button>
           <button id="save-edit" type="button" class="danger">Guardar</button>

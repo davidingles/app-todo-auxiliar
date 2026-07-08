@@ -126,6 +126,19 @@ function getFocusableElements(container) {
 }
 
 function handleModalKeydown(event) {
+  if (event.key === 'Escape') {
+    const editModal = document.getElementById('edit-modal');
+    const confirmModal = document.getElementById('confirm-modal');
+    if (editModal && !editModal.classList.contains('hidden')) {
+      closeEditModal();
+      return;
+    }
+    if (confirmModal && !confirmModal.classList.contains('hidden')) {
+      closeDeleteModal();
+      return;
+    }
+  }
+
   if (event.key !== 'Tab') return;
 
   const modal = document.querySelector('.modal:not(.hidden)');
@@ -186,7 +199,7 @@ function openEditModal(taskId, focusTarget = 'title') {
   modal.classList.remove('hidden');
   modal.setAttribute('aria-hidden', 'false');
   const focusElement = focusTarget === 'tags'
-    ? document.querySelector('#edit-task-tags input')
+    ? document.getElementById('edit-task-tags')
     : document.getElementById('edit-task-title');
   focusElement.focus();
 }
@@ -251,16 +264,16 @@ function getPrimaryTag(tags) {
 }
 
 function getSelectedTags() {
-  return Array.from(document.querySelectorAll('#edit-task-tags input:checked'))
-    .map((input) => input.value)
-    .filter((tag) => tagOptions.includes(tag));
+  const sel = document.getElementById('edit-task-tags');
+  const val = sel.value;
+  return val ? [val] : [];
 }
 
 function setSelectedTags(tags) {
-  const selectedTags = new Set(normalizeTags(tags).map((tag) => tag.toLowerCase()));
-  document.querySelectorAll('#edit-task-tags input').forEach((input) => {
-    input.checked = selectedTags.has(input.value);
-  });
+  const normalized = normalizeTags(tags).map((t) => t.toLowerCase());
+  const firstTag = normalized.find((t) => tagOptions.includes(t));
+  const sel = document.getElementById('edit-task-tags');
+  sel.value = firstTag || '';
 }
 
 function compareManualOrder(a, b) {
