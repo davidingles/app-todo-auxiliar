@@ -4,11 +4,48 @@ const styleTag = document.createElement('style');
 styleTag.textContent = css;
 document.head.appendChild(styleTag);
 
+// ── Autenticación ──
+
+const TOKEN_KEY = 'token';
+
+function getToken() {
+  return localStorage.getItem(TOKEN_KEY);
+}
+
+function redirectToLogin() {
+  localStorage.removeItem(TOKEN_KEY);
+  window.location.href = '/login.html';
+}
+
+// Si no hay token, redirigir al login
+if (!getToken()) {
+  redirectToLogin();
+}
+
+// Helper fetch con autenticación
+async function authFetch(url, options = {}) {
+  const token = getToken();
+  const headers = {
+    ...options.headers,
+    Authorization: `Bearer ${token}`,
+  };
+
+  const response = await fetch(url, { ...options, headers });
+
+  if (response.status === 401) {
+    redirectToLogin();
+    throw new Error('Sesión expirada');
+  }
+
+  return response;
+}
+
 const API_URL = 'http://127.0.0.1:3001/api/tasks';
 const taskForm = document.getElementById('task-form');
 const titleInput = document.getElementById('task-title');
 const descriptionInput = document.getElementById('task-description');
 const searchInput = document.getElementById('search-input');
+const logoutBtn = document.getElementById('logout-btn');
 const columns = {
   pendiente: document.querySelector('[data-status="pendiente"] .task-list'),
   en_proceso: document.querySelector('[data-status="en_proceso"] .task-list'),
@@ -367,7 +404,7 @@ function createCard(task) {
     formData.append('file', file);
 
     try {
-      await fetch(`${API_URL}/${task.id}/attachments`, {
+      await authFetch(`${API_URL}/${task.id}/attachments`, {
         method: 'POST',
         body: formData,
       });
@@ -644,7 +681,7 @@ function computeNextPosition(prevTask, nextTask) {
 
 async function loadTasks() {
   try {
-    const response = await fetch(API_URL);
+    const response = await authFetch(API_URL);
     const tasks = await response.json();
     renderTasks(tasks);
   } catch (error) {
@@ -662,7 +699,7 @@ async function createTask(event) {
 
   if (!payload.title) return;
 
-  await fetch(API_URL, {
+  await authFetch(API_URL, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
@@ -673,7 +710,7 @@ async function createTask(event) {
 }
 
 async function updateTask(taskId, updates) {
-  await fetch(`${API_URL}/${taskId}`, {
+  await authFetch(`${API_URL}/${taskId}`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(updates),
@@ -682,7 +719,7 @@ async function updateTask(taskId, updates) {
 }
 
 async function deleteTask(taskId) {
-  await fetch(`${API_URL}/${taskId}`, { method: 'DELETE' });
+  await authFetch(`${API_URL}/${taskId}`, { method: 'DELETE' });
   await loadTasks();
 }
 
@@ -712,6 +749,14 @@ function attachInteractions() {
        sidebar.classList.toggle('is-expanded');
        const isExpanded = sidebar.classList.contains('is-expanded');
        sidebarToggle.setAttribute('aria-label', isExpanded ? 'Contraer archivado' : 'Expandir archivado');
+     });
+   }
+
+   // ── Cerrar sesión ──
+   if (logoutBtn) {
+     logoutBtn.addEventListener('click', () => {
+       localStorage.removeItem('token');
+       window.location.href = '/login.html';
      });
    }
 

@@ -76,6 +76,41 @@ button {
   position: relative;
 }
 
+.topbar-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.logout-btn {
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--border);
+  background: #0f1115;
+  color: var(--muted);
+  border-radius: 8px;
+  padding: 6px;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.logout-btn:hover {
+  color: #f87171;
+  border-color: rgba(248, 113, 113, 0.3);
+  background: rgba(248, 113, 113, 0.06);
+}
+
+.logout-btn svg {
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  fill: none;
+}
+
 .search-icon {
   position: absolute;
   left: 12px;

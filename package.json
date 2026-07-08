@@ -11,11 +11,15 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "bcryptjs": "^3.0.3",
     "better-sqlite3": "^11.7.0",
     "cors": "^2.8.6",
-    "dotenv": "^16.4.1",
+    "dotenv": "^16.6.1",
     "express": "^4.21.2",
-    "multer": "^2.2.0"
+    "jsonwebtoken": "^9.0.3",
+    "multer": "^2.2.0",
+    "passport": "^0.7.0",
+    "passport-google-oauth20": "^2.0.0"
   },
   "devDependencies": {
     "concurrently": "^9.0.1",
