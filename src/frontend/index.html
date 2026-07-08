@@ -1,4 +1,4 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="es">
   <head>
     <meta charset="UTF-8" />
@@ -10,11 +10,14 @@
       <header class="topbar">
         <div class="topbar-row">
           <div>
-            <p class="eyebrow">Panel local</p>
-            <h1>Todo Tasks</h1>
+            <h1>Mis Tareas</h1>
           </div>
           <div class="search-container">
-            <input id="search-input" type="text" placeholder="Buscar tareas..." autocomplete="off" />
+            <svg class="search-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <circle cx="11" cy="11" r="8" />
+              <path d="M21 21l-4.35-4.35" />
+            </svg>
+            <input id="search-input" type="text" placeholder="Buscar tareas...   (/)" autocomplete="off" />
           </div>
         </div>
         <form id="task-form" class="task-form">
@@ -25,65 +28,70 @@
       </header>
 
       <main class="kanban">
-        <section class="column" data-status="pendiente">
-          <div class="column-header">
-            <div>
-              <h2>Pendiente</h2>
-              <select class="column-sort" data-sort-control aria-label="Ordenar Pendiente">
-                <option value="manual">Manual</option>
-                <option value="date">Fecha</option>
-                <option value="tags">Etiquetas</option>
-              </select>
+        <div class="kanban-columns">
+          <section class="column" data-status="pendiente">
+            <div class="column-header">
+              <div>
+                <h2>Pendiente</h2>
+                <select class="column-sort" data-sort-control aria-label="Ordenar Pendiente">
+                  <option value="manual">Manual</option>
+                  <option value="date">Fecha</option>
+                  <option value="tags">Etiquetas</option>
+                </select>
+              </div>
+              <span class="badge" data-count>0</span>
             </div>
-            <span class="badge" data-count>0</span>
-          </div>
-          <div class="task-list"></div>
-        </section>
+            <div class="task-list"></div>
+          </section>
 
-        <section class="column" data-status="en_proceso">
-          <div class="column-header">
-            <div>
-              <h2>En Proceso</h2>
-              <select class="column-sort" data-sort-control aria-label="Ordenar En Proceso">
-                <option value="manual">Manual</option>
-                <option value="date">Fecha</option>
-                <option value="tags">Etiquetas</option>
-              </select>
+          <section class="column" data-status="en_proceso">
+            <div class="column-header">
+              <div>
+                <h2>En Proceso</h2>
+                <select class="column-sort" data-sort-control aria-label="Ordenar En Proceso">
+                  <option value="manual">Manual</option>
+                  <option value="date">Fecha</option>
+                  <option value="tags">Etiquetas</option>
+                </select>
+              </div>
+              <span class="badge" data-count>0</span>
             </div>
-            <span class="badge" data-count>0</span>
-          </div>
-          <div class="task-list"></div>
-        </section>
+            <div class="task-list"></div>
+          </section>
 
-        <section class="column" data-status="completado">
-          <div class="column-header">
-            <div>
-              <h2>Completado</h2>
-              <select class="column-sort" data-sort-control aria-label="Ordenar Completado">
-                <option value="manual">Manual</option>
-                <option value="date">Fecha</option>
-                <option value="tags">Etiquetas</option>
-              </select>
+          <section class="column" data-status="completado">
+            <div class="column-header">
+              <div>
+                <h2>Completado</h2>
+                <select class="column-sort" data-sort-control aria-label="Ordenar Completado">
+                  <option value="manual">Manual</option>
+                  <option value="date">Fecha</option>
+                  <option value="tags">Etiquetas</option>
+                </select>
+              </div>
+              <span class="badge" data-count>0</span>
             </div>
-            <span class="badge" data-count>0</span>
-          </div>
-          <div class="task-list"></div>
-        </section>
+            <div class="task-list"></div>
+          </section>
+        </div>
 
-        <section class="column" data-status="archivado">
-          <div class="column-header">
-            <div>
-              <h2>Archivado</h2>
-              <select class="column-sort" data-sort-control aria-label="Ordenar Archivado">
-                <option value="manual">Manual</option>
-                <option value="date">Fecha</option>
-                <option value="tags">Etiquetas</option>
-              </select>
+        <aside class="sidebar" data-sidebar="archivado">
+          <button class="sidebar-toggle" type="button" aria-label="Alternar archivado" title="Archivado"></button>
+          <section class="column" data-status="archivado">
+            <div class="column-header">
+              <div>
+                <h2>Archivado</h2>
+                <select class="column-sort" data-sort-control aria-label="Ordenar Archivado">
+                  <option value="manual">Manual</option>
+                  <option value="date">Fecha</option>
+                  <option value="tags">Etiquetas</option>
+                </select>
+              </div>
+              <span class="badge" data-count>0</span>
             </div>
-            <span class="badge" data-count>0</span>
-          </div>
-          <div class="task-list"></div>
-        </section>
+            <div class="task-list"></div>
+          </section>
+        </aside>
       </main>
     </div>
 
@@ -111,10 +119,33 @@
           <span>Descripción</span>
           <textarea id="edit-task-description" rows="4"></textarea>
         </label>
-        <label class="field">
-          <span>Etiquetas</span>
-          <input id="edit-task-tags" type="text" placeholder="trabajo, urgente, diseño" />
-        </label>
+        <fieldset class="field tag-field" id="edit-task-tags">
+          <legend>Etiquetas</legend>
+          <label class="tag-choice tag-choice-trabajo">
+            <input type="checkbox" value="trabajo" />
+            <span>Trabajo</span>
+          </label>
+          <label class="tag-choice tag-choice-gym">
+            <input type="checkbox" value="gym" />
+            <span>Gym</span>
+          </label>
+          <label class="tag-choice tag-choice-familia">
+            <input type="checkbox" value="familia" />
+            <span>Familia</span>
+          </label>
+          <label class="tag-choice tag-choice-devs">
+            <input type="checkbox" value="devs" />
+            <span>Devs</span>
+          </label>
+          <label class="tag-choice tag-choice-religion">
+            <input type="checkbox" value="religion" />
+            <span>Religión</span>
+          </label>
+          <label class="tag-choice tag-choice-personal">
+            <input type="checkbox" value="personal" />
+            <span>Personal</span>
+          </label>
+        </fieldset>
         <div class="modal-actions">
           <button id="cancel-edit" type="button">Cancelar</button>
           <button id="save-edit" type="button" class="danger">Guardar</button>

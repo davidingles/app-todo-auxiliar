@@ -21,6 +21,7 @@ const columnSortModes = {
   completado: 'manual',
   archivado: 'manual',
 };
+const tagOptions = ['trabajo', 'gym', 'familia', 'devs', 'religion', 'personal'];
 
 let tasksCache = [];
 let filteredTasksCache = [];
@@ -101,14 +102,14 @@ function openEditModal(taskId, focusTarget = 'title') {
   editingTaskId = taskId;
   document.getElementById('edit-task-title').value = task.title;
   document.getElementById('edit-task-description').value = task.description || '';
-  document.getElementById('edit-task-tags').value = tagsToInputValue(task.tags);
+  setSelectedTags(task.tags);
 
   const modal = document.getElementById('edit-modal');
   if (!modal) return;
   modal.classList.remove('hidden');
   modal.setAttribute('aria-hidden', 'false');
   const focusElement = focusTarget === 'tags'
-    ? document.getElementById('edit-task-tags')
+    ? document.querySelector('#edit-task-tags input')
     : document.getElementById('edit-task-title');
   focusElement.focus();
 }
@@ -168,31 +169,56 @@ function normalizeTags(tags) {
   return [];
 }
 
-function parseTagsInput(value) {
-  const seen = new Set();
-  return value
-    .split(',')
-    .map((tag) => tag.trim())
-    .filter(Boolean)
-    .filter((tag) => {
-      const key = tag.toLowerCase();
-      if (seen.has(key)) return false;
-      seen.add(key);
-      return true;
-    });
+function getPrimaryTag(tags) {
+  return normalizeTags(tags).find((tag) => tagOptions.includes(tag.toLowerCase()))?.toLowerCase() || '';
 }
 
-function tagsToInputValue(tags) {
-  return normalizeTags(tags).join(', ');
+function getSelectedTags() {
+  return Array.from(document.querySelectorAll('#edit-task-tags input:checked'))
+    .map((input) => input.value)
+    .filter((tag) => tagOptions.includes(tag));
+}
+
+function setSelectedTags(tags) {
+  const selectedTags = new Set(normalizeTags(tags).map((tag) => tag.toLowerCase()));
+  document.querySelectorAll('#edit-task-tags input').forEach((input) => {
+    input.checked = selectedTags.has(input.value);
+  });
 }
 
 function compareManualOrder(a, b) {
   return a.position - b.position;
 }
 
+function parseTaskDate(value) {
+  if (!value) return null;
+
+  const parsedDate = Date.parse(value);
+  if (!Number.isNaN(parsedDate)) {
+    return new Date(parsedDate);
+  }
+
+  const match = String(value).match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})(?:\s+(\d{1,2}):(\d{2})(?::(\d{2}))?)?$/);
+  if (!match) return null;
+
+  const [, day, month, year, hours = '0', minutes = '0', seconds = '0'] = match;
+  return new Date(Number(year), Number(month) - 1, Number(day), Number(hours), Number(minutes), Number(seconds));
+}
+
+function formatTaskDate(value) {
+  const date = parseTaskDate(value);
+  if (!date) return '';
+
+  return new Intl.DateTimeFormat('es-ES', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+  }).format(date);
+}
+
 function compareDateOrder(a, b) {
-  const dateA = Date.parse(a.updated_at || '') || 0;
-  const dateB = Date.parse(b.updated_at || '') || 0;
+  const dateA = parseTaskDate(a.updated_at)?.getTime() || 0;
+  const dateB = parseTaskDate(b.updated_at)?.getTime() || 0;
   return dateB - dateA || compareManualOrder(a, b);
 }
 
@@ -239,6 +265,18 @@ function sortTasksForColumn(tasks, status) {
   return sortedTasks.sort(compareManualOrder);
 }
 
+function formatFileSize(bytes) {
+  if (!bytes) return '';
+  const units = ['B', 'KB', 'MB', 'GB'];
+  let size = bytes;
+  let unitIndex = 0;
+  while (size >= 1024 && unitIndex < units.length - 1) {
+    size /= 1024;
+    unitIndex++;
+  }
+  return `${size.toFixed(unitIndex === 0 ? 0 : 1)} ${units[unitIndex]}`;
+}
+
 function tagIconSvg() {
   return `
     <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
@@ -250,10 +288,23 @@ function tagIconSvg() {
   `;
 }
 
+function attachmentIconSvg() {
+  return `
+    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48" />
+    </svg>
+  `;
+}
+
 function createCard(task) {
   const tags = normalizeTags(task.tags);
+  const primaryTag = getPrimaryTag(tags);
+  const formattedDate = formatTaskDate(task.updated_at);
   const tagsHtml = tags.length
-    ? `<div class="task-tags">${tags.map((tag) => `<span class="task-tag">#${escapeHtml(tag)}</span>`).join('')}</div>`
+    ? `<div class="task-tags">${tags.map((tag) => `<span class="task-tag" data-tag="${escapeHtml(tag.toLowerCase())}">#${escapeHtml(tag)}</span>`).join('')}</div>`
+    : '';
+  const dateHtml = formattedDate
+    ? `<time class="task-date" datetime="${escapeHtml(task.updated_at)}">${escapeHtml(formattedDate)}</time>`
     : '';
   const card = document.createElement('article');
   card.className = 'task-card';
@@ -263,21 +314,70 @@ function createCard(task) {
   card.dataset.id = task.id;
   card.dataset.status = task.status;
   card.dataset.position = task.position;
+  if (primaryTag) {
+    card.dataset.tag = primaryTag;
+  }
+
+  const attachments = task.attachments || [];
+  const hasAttachments = attachments.length > 0;
 
   card.innerHTML = `
     <div class="card-header">
       <h3>${escapeHtml(task.title)}</h3>
       <div class="card-actions">
         <button class="tag-btn card-action-btn" type="button" aria-label="Editar etiquetas" title="Editar etiquetas" tabindex="-1">${tagIconSvg()}</button>
+        <button class="upload-btn card-action-btn" type="button" aria-label="Adjuntar archivo" title="Adjuntar archivo" tabindex="-1">${attachmentIconSvg()}</button>
         <button class="delete-btn card-action-btn" type="button" aria-label="Eliminar tarea" tabindex="-1">✕</button>
       </div>
     </div>
+    ${hasAttachments ? `<div class="card-attachments">${attachments.map((att) => `
+      <a class="attachment-file" href="${API_URL.replace('/api/tasks', '/uploads')}/${encodeURIComponent(att.filename)}" target="_blank" title="${escapeHtml(att.originalName)}" download>
+        <span class="attachment-icon">📎</span>
+        <span class="attachment-name">${escapeHtml(att.originalName)}</span>
+        <span class="attachment-size">${formatFileSize(att.size)}</span>
+      </a>`).join('')}</div>` : ''}
     ${tagsHtml}
+    ${dateHtml}
   `;
+
+  // File upload
+  const fileInput = document.createElement('input');
+  fileInput.type = 'file';
+  fileInput.hidden = true;
+  card.appendChild(fileInput);
 
   card.addEventListener('click', (event) => {
     if (event.target.closest('.card-action-btn')) return;
     selectTask(task.id);
+  });
+
+  // Upload button click handler
+  card.addEventListener('click', async (event) => {
+    const uploadBtn = event.target.closest('.upload-btn');
+    if (!uploadBtn) return;
+    event.stopPropagation();
+    fileInput.click();
+  });
+
+  fileInput.addEventListener('change', async () => {
+    const file = fileInput.files?.[0];
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append('file', file);
+
+    try {
+      await fetch(`${API_URL}/${task.id}/attachments`, {
+        method: 'POST',
+        body: formData,
+      });
+      await loadTasks();
+      selectTask(task.id);
+    } catch (error) {
+      console.error('Error al subir archivo', error);
+    }
+
+    fileInput.value = '';
   });
 
   card.addEventListener('dblclick', (event) => {
@@ -604,10 +704,36 @@ function attachInteractions() {
      });
    });
 
+   // ── Sidebar toggle ──
+   const sidebar = document.querySelector('[data-sidebar="archivado"]');
+   const sidebarToggle = sidebar?.querySelector('.sidebar-toggle');
+   if (sidebar && sidebarToggle) {
+     sidebarToggle.addEventListener('click', () => {
+       sidebar.classList.toggle('is-expanded');
+       const isExpanded = sidebar.classList.contains('is-expanded');
+       sidebarToggle.setAttribute('aria-label', isExpanded ? 'Contraer archivado' : 'Expandir archivado');
+     });
+   }
+
    document.addEventListener('keydown', (event) => {
-     if (event.ctrlKey && (event.key === 'f' || event.key === 'F')) {
+     // '/' para buscar (no interfiere con atajos del navegador)
+     if (event.key === '/' && !event.ctrlKey && !event.metaKey && !event.altKey) {
+       const tag = document.activeElement?.tagName?.toLowerCase();
+       const isInput = tag === 'input' || tag === 'textarea' || tag === 'select';
+       if (!isInput) {
+         event.preventDefault();
+         searchInput.focus();
+       }
+     }
+     // Escape para salir del buscador
+     if (event.key === 'Escape' && document.activeElement === searchInput) {
+       searchInput.blur();
+     }
+     // Ctrl+Shift+A para alternar sidebar de archivado
+     if (event.ctrlKey && event.shiftKey && (event.key === 'a' || event.key === 'A')) {
        event.preventDefault();
-       searchInput.focus();
+       const btn = document.querySelector('.sidebar-toggle');
+       if (btn) btn.click();
      }
    });
 
@@ -643,7 +769,7 @@ function attachInteractions() {
     if (!editingTaskId) return;
     const title = document.getElementById('edit-task-title').value.trim();
     const description = document.getElementById('edit-task-description').value.trim();
-    const tags = parseTagsInput(document.getElementById('edit-task-tags').value);
+    const tags = getSelectedTags();
     if (!title) return;
 
     await updateTask(editingTaskId, { title, description, tags });

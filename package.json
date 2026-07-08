@@ -14,7 +14,8 @@
     "better-sqlite3": "^11.7.0",
     "cors": "^2.8.6",
     "dotenv": "^16.4.1",
-    "express": "^4.21.2"
+    "express": "^4.21.2",
+    "multer": "^2.2.0"
   },
   "devDependencies": {
     "concurrently": "^9.0.1",

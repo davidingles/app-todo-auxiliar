@@ -1,4 +1,4 @@
-# Todo Tasks
+﻿# Todo Tasks
 
 Aplicación de lista de tareas estilo Kanban con frontend vanilla JavaScript y backend Node.js/Express/better-sqlite3.
 

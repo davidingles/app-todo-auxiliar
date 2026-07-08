@@ -1,4 +1,4 @@
-import Database from 'better-sqlite3';
+﻿import Database from 'better-sqlite3';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -23,6 +23,9 @@ const taskColumns = db.prepare('PRAGMA table_info(tasks)').all().map((column) =>
 if (!taskColumns.includes('tags')) {
   db.exec("ALTER TABLE tasks ADD COLUMN tags TEXT DEFAULT '[]'");
 }
+if (!taskColumns.includes('attachments')) {
+  db.exec("ALTER TABLE tasks ADD COLUMN attachments TEXT DEFAULT '[]'");
+}
 
 export function getAllTasks() {
   return db.prepare('SELECT * FROM tasks ORDER BY position, updated_at').all();
@@ -43,6 +46,7 @@ export function updateTaskById(task) {
     SET title = @title,
         description = @description,
         tags = @tags,
+        attachments = @attachments,
         status = @status,
         position = @position,
         updated_at = @updated_at
