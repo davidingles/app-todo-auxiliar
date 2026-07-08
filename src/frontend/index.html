@@ -9,22 +9,28 @@
     <div class="app-shell">
       <header class="topbar">
         <div class="topbar-row">
-          <div class="topbar-left">
-            <h1>Mis Tareas</h1>
-            <button id="logout-btn" class="logout-btn" type="button" title="Cerrar sesión" aria-label="Cerrar sesión">
-              <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" width="16" height="16">
-                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
-                <polyline points="16 17 21 12 16 7" />
-                <line x1="21" y1="12" x2="9" y2="12" />
-              </svg>
-            </button>
-          </div>
           <div class="search-container">
             <svg class="search-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
               <circle cx="11" cy="11" r="8" />
               <path d="M21 21l-4.35-4.35" />
             </svg>
             <input id="search-input" type="text" placeholder="Buscar tareas...   (/)" autocomplete="off" />
+          </div>
+          <div class="topbar-right">
+            <div class="user-info">
+              <img id="user-avatar" class="user-avatar" src="" alt="Avatar" />
+              <div class="user-details">
+                <h1>Mis Tareas</h1>
+                <span id="user-name" class="user-name"></span>
+              </div>
+              <button id="logout-btn" class="logout-btn" type="button" title="Cerrar sesión" aria-label="Cerrar sesión">
+                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" width="16" height="16">
+                  <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                  <polyline points="16 17 21 12 16 7" />
+                  <line x1="21" y1="12" x2="9" y2="12" />
+                </svg>
+              </button>
+            </div>
           </div>
         </div>
         <form id="task-form" class="task-form">

@@ -22,6 +22,9 @@ if (!getToken()) {
   redirectToLogin();
 }
 
+// Cargar datos del usuario
+loadUserInfo();
+
 // Helper fetch con autenticación
 async function authFetch(url, options = {}) {
   const token = getToken();
@@ -38,6 +41,43 @@ async function authFetch(url, options = {}) {
   }
 
   return response;
+}
+
+// ── Mostrar datos del usuario en la interfaz ──
+
+function displayUser(user) {
+  const avatarImg = document.getElementById('user-avatar');
+  const nameSpan = document.getElementById('user-name');
+  if (!avatarImg || !nameSpan) return;
+
+  if (user.avatar) {
+    avatarImg.src = user.avatar;
+    avatarImg.style.display = '';
+  } else {
+    avatarImg.style.display = 'none';
+  }
+  nameSpan.textContent = user.name || user.email || '';
+}
+
+async function loadUserInfo() {
+  // Mostrar datos cacheados primero
+  const cached = localStorage.getItem('user');
+  if (cached) {
+    try {
+      displayUser(JSON.parse(cached));
+    } catch { /* ignorar */ }
+  }
+
+  // Luego actualizar desde el servidor
+  try {
+    const res = await authFetch('http://127.0.0.1:3001/api/auth/me');
+    if (!res.ok) return;
+    const user = await res.json();
+    localStorage.setItem('user', JSON.stringify(user));
+    displayUser(user);
+  } catch {
+    // Ignorar errores de carga
+  }
 }
 
 const API_URL = 'http://127.0.0.1:3001/api/tasks';

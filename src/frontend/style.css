@@ -67,7 +67,7 @@ button {
   .topbar-row {
     flex-direction: row;
     justify-content: space-between;
-    align-items: center;
+    align-items: flex-start;
   }
 }
 
@@ -76,10 +76,56 @@ button {
   position: relative;
 }
 
-.topbar-left {
+.topbar-right {
   display: flex;
-  align-items: center;
-  gap: 10px;
+  flex-shrink: 0;
+}
+
+.user-info {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.user-details {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+}
+
+.user-details h1 {
+  margin: 0;
+  font-size: 1.35rem;
+  font-weight: 600;
+  color: var(--muted);
+  line-height: 1.2;
+}
+
+.user-avatar {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--border);
+  background: var(--panel);
+  flex-shrink: 0;
+}
+
+.user-name {
+  font-size: 0.85rem;
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 150px;
+}
+
+@media (max-width: 639px) {
+  .user-name {
+    display: none;
+  }
 }
 
 .logout-btn {
@@ -147,13 +193,6 @@ button {
 #search-input:focus ~ .search-icon,
 .search-container:focus-within .search-icon {
   stroke: #60a5fa;
-}
-
-.topbar h1 {
-  margin: 0;
-  font-size: 1.35rem;
-  font-weight: 600;
-  color: var(--muted);
 }
 
 .eyebrow {

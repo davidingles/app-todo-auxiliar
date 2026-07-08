@@ -36,6 +36,10 @@ function saveToken(token) {
   localStorage.setItem('token', token);
 }
 
+function saveUser(user) {
+  localStorage.setItem('user', JSON.stringify(user));
+}
+
 function getToken() {
   return localStorage.getItem('token');
 }
@@ -102,6 +106,7 @@ loginForm.addEventListener('submit', async (e) => {
     }
 
     saveToken(data.token);
+    saveUser(data.user);
     window.location.href = '/';
   } catch (err) {
     showError(loginError, 'Error de conexión con el servidor');
@@ -143,6 +148,7 @@ registerForm.addEventListener('submit', async (e) => {
     }
 
     saveToken(data.token);
+    saveUser(data.user);
     window.location.href = '/';
   } catch (err) {
     showError(registerError, 'Error de conexión con el servidor');
