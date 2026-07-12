@@ -167,10 +167,9 @@ function openDeleteModal(taskId) {
   lastFocusedElement = document.activeElement;
   modal.classList.remove('hidden');
   modal.setAttribute('aria-hidden', 'false');
-  requestAnimationFrame(() => {
-    const cancelButton = document.getElementById('cancel-delete');
-    if (cancelButton) cancelButton.focus();
-  });
+  // Enfocar el botón Eliminar directamente (estamos dentro de un gesto de usuario)
+  const deleteButton = document.getElementById('confirm-delete');
+  if (deleteButton) deleteButton.focus();
 }
 
 function closeDeleteModal() {
@@ -840,6 +839,7 @@ function attachInteractions() {
     event.stopPropagation();
     const card = event.target.closest('.task-card');
     if (!card) return;
+    selectTask(card.dataset.id);
     openDeleteModal(card.dataset.id);
   });
 
