@@ -547,6 +547,93 @@ p {
   color: #a78bfa;
 }
 
+.upload-btn.has-attachments {
+  color: #ff2d55;
+  position: relative;
+}
+
+.upload-btn.has-attachments svg {
+  stroke: #ff2d55;
+}
+
+.attachment-count {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  background: #ff2d55;
+  color: white;
+  font-size: 0.55rem;
+  font-weight: 700;
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  line-height: 1;
+}
+
+.modal-attachments {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border);
+  margin-bottom: 16px;
+}
+
+.attachment-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.attachment-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.attachment-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border);
+  text-decoration: none;
+  color: var(--text);
+  font-size: 0.85rem;
+  transition: all 0.2s ease;
+}
+
+.attachment-item:hover {
+  background: rgba(255, 45, 85, 0.1);
+  border-color: rgba(255, 45, 85, 0.3);
+}
+
+.attachment-file-icon {
+  flex-shrink: 0;
+}
+
+.attachment-file-name {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: #ff8fa3;
+}
+
+.attachment-file-size {
+  flex-shrink: 0;
+  color: var(--muted);
+  font-size: 0.75rem;
+}
+
 .card-attachments {
   display: flex;
   flex-direction: column;

@@ -193,6 +193,27 @@ function openEditModal(taskId, focusTarget = 'title') {
   document.getElementById('edit-task-description').value = task.description || '';
   setSelectedTags(task.tags);
 
+  const attachmentsContainer = document.getElementById('edit-task-attachments');
+  const attachments = task.attachments || [];
+  if (attachments.length > 0) {
+    attachmentsContainer.classList.remove('hidden');
+    attachmentsContainer.innerHTML = `
+      <span class="attachment-label">Archivos adjuntos</span>
+      <div class="attachment-list">
+        ${attachments.map((att) => `
+          <a class="attachment-item" href="${API_URL.replace('/api/tasks', '/uploads')}/${encodeURIComponent(att.filename)}" target="_blank" title="${escapeHtml(att.originalName)}" download>
+            <span class="attachment-file-icon">📎</span>
+            <span class="attachment-file-name">${escapeHtml(att.originalName)}</span>
+            <span class="attachment-file-size">${formatFileSize(att.size)}</span>
+          </a>
+        `).join('')}
+      </div>
+    `;
+  } else {
+    attachmentsContainer.classList.add('hidden');
+    attachmentsContainer.innerHTML = '';
+  }
+
   const modal = document.getElementById('edit-modal');
   if (!modal) return;
   modal.classList.remove('hidden');
@@ -415,16 +436,10 @@ function createCard(task) {
       <h3>${escapeHtml(task.title)}</h3>
       <div class="card-actions">
         <button class="tag-btn card-action-btn" type="button" aria-label="Editar etiquetas" title="Editar etiquetas" tabindex="-1">${tagIconSvg()}</button>
-        <button class="upload-btn card-action-btn" type="button" aria-label="Adjuntar archivo" title="Adjuntar archivo" tabindex="-1">${attachmentIconSvg()}</button>
+        <button class="upload-btn card-action-btn${hasAttachments ? ' has-attachments' : ''}" type="button" aria-label="Adjuntar archivo" title="Adjuntar archivo" tabindex="-1">${attachmentIconSvg()}</button>
         <button class="delete-btn card-action-btn" type="button" aria-label="Eliminar tarea" tabindex="-1">✕</button>
       </div>
     </div>
-    ${hasAttachments ? `<div class="card-attachments">${attachments.map((att) => `
-      <a class="attachment-file" href="${API_URL.replace('/api/tasks', '/uploads')}/${encodeURIComponent(att.filename)}" target="_blank" title="${escapeHtml(att.originalName)}" download>
-        <span class="attachment-icon">📎</span>
-        <span class="attachment-name">${escapeHtml(att.originalName)}</span>
-        <span class="attachment-size">${formatFileSize(att.size)}</span>
-      </a>`).join('')}</div>` : ''}
     ${tagsHtml}
     ${dateHtml}
   `;
