@@ -1,8 +1,4 @@
-import css from './style.css?raw';
-
-const styleTag = document.createElement('style');
-styleTag.textContent = css;
-document.head.appendChild(styleTag);
+import './style.css';
 
 // ── Autenticación ──
 
@@ -70,7 +66,7 @@ async function loadUserInfo() {
 
   // Luego actualizar desde el servidor
   try {
-    const res = await authFetch('http://127.0.0.1:3001/api/auth/me');
+const res = await authFetch('/api/auth/me');
     if (!res.ok) return;
     const user = await res.json();
     localStorage.setItem('user', JSON.stringify(user));
@@ -80,7 +76,7 @@ async function loadUserInfo() {
   }
 }
 
-const API_URL = 'http://127.0.0.1:3001/api/tasks';
+const API_URL = '/api/tasks';
 const taskForm = document.getElementById('task-form');
 const titleInput = document.getElementById('task-title');
 const descriptionInput = document.getElementById('task-description');

@@ -32,11 +32,23 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 
 const app = express();
-const PORT = 3001;
+const PORT = process.env.PORT || 3001;
+
+// Log de peticiones para depuración
+app.use((req, res, next) => {
+  console.log(`[${new Date().toISOString()}] ${req.method} ${req.url} from ${req.ip}`);
+  next();
+});
 
 app.use(cors());
 app.use(express.json());
 app.use('/uploads', express.static(uploadsDir));
+
+// Servir frontend compilado en producción
+const distPath = path.join(__dirname, '../../dist');
+if (fs.existsSync(distPath)) {
+  app.use(express.static(distPath));
+}
 
 // ── Rutas de autenticación ──
 app.use('/api/auth', authRouter);
@@ -240,6 +252,14 @@ app.get('/api/tasks/:id/attachments', (req, res) => {
   res.json(attachments);
 });
 
-app.listen(PORT, '127.0.0.1', () => {
-  console.log(`Servidor backend escuchando en http://127.0.0.1:${PORT}`);
+// Catch-all: servir index.html para rutas de SPA en producción
+if (fs.existsSync(distPath)) {
+  app.get('*', (req, res) => {
+    res.sendFile(path.join(distPath, 'index.html'));
+  });
+}
+
+const HOST = process.env.HOST || '0.0.0.0';
+app.listen(PORT, HOST, () => {
+  console.log(`Servidor escuchando en http://${HOST}:${PORT}`);
 });

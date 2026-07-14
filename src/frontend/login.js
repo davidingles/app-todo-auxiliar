@@ -1,10 +1,6 @@
-import css from './login.css?raw';
+import './login.css';
 
-const styleTag = document.createElement('style');
-styleTag.textContent = css;
-document.head.appendChild(styleTag);
-
-const API_AUTH = 'http://127.0.0.1:3001/api/auth';
+const API_AUTH = '/api/auth';
 
 // ── Elementos del DOM ──
 
