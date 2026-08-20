@@ -2,27 +2,28 @@
   "name": "app-todo-auxiliar",
   "private": true,
   "version": "1.0.0",
-  "type": "module",
   "scripts": {
-    "dev": "concurrently \"npm run dev:frontend\" \"npm run dev:backend\"",
-    "dev:frontend": "vite --host 127.0.0.1 --port 5173",
-    "dev:backend": "node src/backend/server.js",
-    "build": "vite build",
-    "preview": "vite preview"
+    "dev": "npm --prefix backend run dev",
+    "start": "npm --prefix backend run start",
+    "check-dbs": "npm --prefix database run check",
+    "generate-ico": "npm --prefix backend run generate-ico"
   },
+  "description": "Aplicación de lista de tareas estilo Kanban con frontend vanilla JavaScript (módulos ES nativos, sin bundler) y backend Node.js/Express/better-sqlite3.",
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/davidingles/app-todo-auxiliar.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/davidingles/app-todo-auxiliar/issues"
+  },
+  "homepage": "https://github.com/davidingles/app-todo-auxiliar#readme",
   "dependencies": {
-    "bcryptjs": "^3.0.3",
-    "better-sqlite3": "^11.7.0",
-    "cors": "^2.8.6",
     "dotenv": "^16.6.1",
-    "express": "^4.21.2",
-    "jsonwebtoken": "^9.0.3",
-    "multer": "^2.2.0",
-    "passport": "^0.7.0",
-    "passport-google-oauth20": "^2.0.0"
-  },
-  "devDependencies": {
-    "concurrently": "^9.0.1",
-    "vite": "^5.4.10"
+    "tesseract.js": "^7.0.0"
   }
 }

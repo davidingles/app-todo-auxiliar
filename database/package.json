@@ -1,0 +1,12 @@
+{
+  "name": "app-todo-auxiliar-database",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "check": "node check.cjs"
+  },
+  "dependencies": {
+    "better-sqlite3": "^11.7.0"
+  }
+}
