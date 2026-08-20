@@ -2,30 +2,10 @@
   "name": "app-todo-auxiliar",
   "private": true,
   "version": "1.0.0",
-  "type": "module",
   "scripts": {
-    "dev": "concurrently \"npm run dev:frontend\" \"npm run dev:backend\"",
-    "dev:frontend": "vite --host 127.0.0.1 --port 5173",
-    "dev:backend": "node src/backend/server.js",
-    "build": "vite build && cp src/frontend/login.html dist/login.html",
-    "preview": "vite preview",
-    "start": "node src/backend/server.js",
-    "prod": "npm run build && npm start"
-  },
-  "dependencies": {
-    "bcryptjs": "^3.0.3",
-    "better-sqlite3": "^11.7.0",
-    "cors": "^2.8.6",
-    "dotenv": "^16.6.1",
-    "express": "^4.21.2",
-    "jsonwebtoken": "^9.0.3",
-    "multer": "^2.2.0",
-    "passport": "^0.7.0",
-    "passport-google-oauth20": "^2.0.0"
-  },
-  "devDependencies": {
-    "concurrently": "^9.0.1",
-    "sharp": "^0.35.3",
-    "vite": "^5.4.10"
+    "dev": "npm --prefix backend run dev",
+    "start": "npm --prefix backend run start",
+    "check-dbs": "npm --prefix database run check",
+    "generate-ico": "npm --prefix backend run generate-ico"
   }
 }

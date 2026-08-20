@@ -1,4 +1,4 @@
-import './login.css';
+import { saveToken, saveUser, getToken } from './auth/session.js';
 
 const API_AUTH = '/api/auth';
 
@@ -26,18 +26,6 @@ function showError(element, message) {
 function hideError(element) {
   element.classList.add('hidden');
   element.textContent = '';
-}
-
-function saveToken(token) {
-  localStorage.setItem('token', token);
-}
-
-function saveUser(user) {
-  localStorage.setItem('user', JSON.stringify(user));
-}
-
-function getToken() {
-  return localStorage.getItem('token');
 }
 
 // ── Verificar sesión activa ──

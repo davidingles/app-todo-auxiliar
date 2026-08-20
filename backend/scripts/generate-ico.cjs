@@ -3,7 +3,7 @@ const fs = require('fs');
 const path = require('path');
 
 async function main() {
-  const svgPath = path.join(__dirname, '..', 'public', 'favicon.svg');
+  const svgPath = path.join(__dirname, '..', '..', 'frontend', 'assets', 'favicon.svg');
   const svg = fs.readFileSync(svgPath, 'utf-8');
 
   const iconSizes = [16, 32, 48, 64, 128, 256];
@@ -43,7 +43,7 @@ async function main() {
     infoHeader.writeUInt32LE(0, 32);
     infoHeader.writeUInt32LE(0, 36);
 
-    // AND mask (1 bit per pixel, padded to 4 bytes)
+    // AND mask
     const andRowSize = Math.ceil(info.width / 32) * 4;
     const andMask = Buffer.alloc(andRowSize * info.height, 0xFF);
 
@@ -51,33 +51,36 @@ async function main() {
     images.push({ data: imageData, width: info.width, height: info.height });
   }
 
-  // Create ICO
+  // Build ICO
   const count = images.length;
   const header = Buffer.alloc(6);
-  header.writeUInt16LE(0, 0);     // reserved
-  header.writeUInt16LE(1, 2);     // ICO type
-  header.writeUInt16LE(count, 4); // image count
+  header.writeUInt16LE(0, 0);
+  header.writeUInt16LE(1, 2);
+  header.writeUInt16LE(count, 4);
 
   let offset = 6 + count * 16;
   const dirEntries = [];
+  const imageDataArr = [];
 
   for (const img of images) {
     const size = img.data.length;
     const entry = Buffer.alloc(16);
     entry.writeUInt8(img.width === 256 ? 0 : img.width, 0);
     entry.writeUInt8(img.height === 256 ? 0 : img.height, 1);
-    entry.writeUInt8(0, 2); // colors
-    entry.writeUInt8(0, 3); // reserved
-    entry.writeUInt16LE(1, 4); // planes
-    entry.writeUInt16LE(32, 6); // bpp
-    entry.writeUInt32LE(size, 8); // size
-    entry.writeUInt32LE(offset, 12); // offset
+    entry.writeUInt8(0, 2);
+    entry.writeUInt8(0, 3);
+    entry.writeUInt16LE(1, 4);
+    entry.writeUInt16LE(32, 6);
+    entry.writeUInt32LE(size, 8);
+    entry.writeUInt32LE(offset, 12);
+
     dirEntries.push(entry);
+    imageDataArr.push(img.data);
     offset += size;
   }
 
-  const ico = Buffer.concat([header, ...dirEntries, ...images.map(i => i.data)]);
-  fs.writeFileSync(path.join(__dirname, '..', 'public', 'favicon.ico'), ico);
+  const ico = Buffer.concat([header, ...dirEntries, ...imageDataArr]);
+  fs.writeFileSync(path.join(__dirname, '..', '..', 'public', 'favicon.ico'), ico);
   console.log('ICO generated successfully!');
 }
 

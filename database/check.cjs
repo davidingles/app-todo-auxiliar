@@ -2,7 +2,7 @@ const Database = require('better-sqlite3');
 const path = require('path');
 
 // tasks.db
-const db1 = new Database(path.join(__dirname, '../data/tasks.db'));
+const db1 = new Database(path.join(__dirname, 'data/tasks.db'));
 const tables1 = db1.prepare("SELECT name FROM sqlite_master WHERE type='table'").all();
 console.log('\n=== tasks.db ===');
 console.log('Tablas:', tables1.map(t => t.name));
@@ -15,7 +15,7 @@ console.log('Tasks por usuario:', tasksByUser1);
 db1.close();
 
 // database.db
-const db2 = new Database(path.join(__dirname, '../data/database.db'));
+const db2 = new Database(path.join(__dirname, 'data/database.db'));
 const tables2 = db2.prepare("SELECT name FROM sqlite_master WHERE type='table'").all();
 console.log('\n=== database.db ===');
 console.log('Tablas:', tables2.map(t => t.name));
