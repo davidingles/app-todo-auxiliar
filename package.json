@@ -7,5 +7,23 @@
     "start": "npm --prefix backend run start",
     "check-dbs": "npm --prefix database run check",
     "generate-ico": "npm --prefix backend run generate-ico"
+  },
+  "description": "Aplicación de lista de tareas estilo Kanban con frontend vanilla JavaScript (módulos ES nativos, sin bundler) y backend Node.js/Express/better-sqlite3.",
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/davidingles/app-todo-auxiliar.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/davidingles/app-todo-auxiliar/issues"
+  },
+  "homepage": "https://github.com/davidingles/app-todo-auxiliar#readme",
+  "dependencies": {
+    "dotenv": "^16.6.1",
+    "tesseract.js": "^7.0.0"
   }
 }
